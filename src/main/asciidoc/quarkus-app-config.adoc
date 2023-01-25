@@ -1,0 +1,33 @@
+= ${project.artifactId} ${project.version}
+
+include::_attributes.adoc[]
+:categories: demo
+:summary: ${project.description}
+:config-file: application.properties
+
+{summary}
+
+== Solution
+
+This is a Quarkus application using the link:https://quarkus.io/guides/writing-extensions#configuration[Quarkus Extension configuration mechanism] and generates a documentation.
+
+Please see below section <<configuration-properties, configuration properties>> for the list of properties you can set in `{config-file}`.
+
+[[configuration-properties]]
+== Configuration Properties
+
+=== Flat config object
+Configuration properties from a "flat" config object:
+
+include::{generated-dir}/config/foo-demo-filelog.adoc[opts=optional,leveloffset=+2]
+
+NOTE: This works fine! The configuration properties contains the description from Javadoc.
+
+=== Aggregate config object
+
+Configuration properties from a config object with an aggregate configuration object containing a collection of configurable properties:
+
+include::{generated-dir}/config/foo-demo-log.adoc[opts=optional,leveloffset=+2]
+
+WARNING: All properties from the embedded config group unfortunately did not get the description from the Javadoc.
+

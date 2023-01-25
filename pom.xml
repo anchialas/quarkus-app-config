@@ -8,6 +8,10 @@
     <artifactId>quarkus-app-config</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <description>
+        Quarkus Application Configuration and documentation using @ConfigRoot/ConfigMapping/ConfigGroup.
+    </description>
+
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,6 +50,15 @@
             <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
 
+        <!-- Provided -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-extension-processor</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
@@ -115,4 +128,167 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <!--
+               Create Documentation in the pre-site phase.
+               The plugins setup is adapted from the Quarkus project:
+               https://github.com/quarkusio/quarkus/tree/main/docs/src/main/asciidoc
+            -->
+            <id>docs</id>
+            <properties>
+                <generated-dir>${maven.multiModuleProjectDirectory}/target/asciidoc/generated</generated-dir>
+                <code-examples-dir>${generated-dir}/examples</code-examples-dir>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-asciidoc</id>
+                                <phase>pre-site</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}/target/asciidoc/sources</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/asciidoc</directory>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-images</id>
+                                <phase>pre-site</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}/target/asciidoc/sources/images</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>target/mdc</directory>
+                                            <filtering>false</filtering>
+                                            <includes>
+                                                <include>*.png</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>target/plantuml/src/main/plantuml</directory>
+                                            <filtering>false</filtering>
+                                            <includes>
+                                                <include>*.png</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>2.2.2</version>
+                        <configuration>
+                            <enableVerbose>true</enableVerbose>
+                            <sourceDirectory>target/asciidoc/sources</sourceDirectory>
+                            <preserveDirectories>true</preserveDirectories>
+                            <attributes>
+                                <generated-dir>${generated-dir}</generated-dir>
+                                <code-examples>${code-examples-dir}</code-examples>
+                                <imagesdir>./images</imagesdir>
+                                <icons>font</icons>
+                                <sectanchors>true</sectanchors>
+                                <source-highlighter>coderay</source-highlighter>
+                                <idprefix/> <!-- set the idprefix to blank -->
+                                <idseparator>-</idseparator>
+                                <docinfo1>true</docinfo1>
+                                <!-- avoid content security policy violations -->
+                                <skip-front-matter>true</skip-front-matter>
+                                <!--
+                                Attributes are now maintained in:
+                                - src/main/asciidoc/_attributes.adoc for attributes that are actually used in the doc content e.g. versions, urls.
+                                - src/main/asciidoc/_attributes-local.adoc for technical attributes that have to be overridden in the website.
+                                -->
+                            </attributes>
+                            <logHandler>
+                                <failIf>
+                                    <severity>WARN</severity>
+                                </failIf>
+                            </logHandler>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>output-html</id>
+                                <phase>pre-site</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>html</backend>
+                                    <attributes>
+                                        <!-- avoid content security policy violations  -->
+                                        <linkcss>true</linkcss>
+                                        <copycss>true</copycss>
+                                    </attributes>
+                                    <!--
+                                    <extensions>
+                                        <extension>
+                                              Register custom inline macro
+                                            <className>io.quarkus.docs.generation.TooltipInlineMacroProcessor</className>
+                                            <blockName>tooltip</blockName>
+                                        </extension>
+                                    </extensions>
+                                    -->
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>output-pdf</id>
+                                <phase>pre-site</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>pdf</backend>
+                                    <outputDirectory>${project.build.directory}/generated-docs-pdf</outputDirectory>
+                                    <attributes>
+                                        <!--
+                                        <pdf-stylesdir>${basedir}/src/main/resources/theme</pdf-stylesdir>
+                                        <pdf-style>quarkus</pdf-style>
+                                        <pdf-fontsdir>${basedir}/src/main/resources/theme/fonts</pdf-fontsdir>
+                                        -->
+                                        <icon-set>fas</icon-set>
+                                        <pagenums/>
+                                    </attributes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj</artifactId>
+                                <version>2.5.7</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-pdf</artifactId>
+                                <version>2.3.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.jruby</groupId>
+                                <artifactId>jruby</artifactId>
+                                <version>9.2.20.1</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

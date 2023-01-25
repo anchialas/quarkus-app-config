@@ -1,0 +1,15 @@
+// for rendering the final page the attributes are set in the appropriate location.
+// they are duplicated here to ease the preview when editing in the IDE
+// --> No blank lines (it ends the document header)
+:idprefix:
+:idseparator: -
+:icons: font
+:target-dir: ../../../target
+:generated-dir: {target-dir}/asciidoc/generated
+:code-examples: {generated-dir}/examples
+:doc-guides: ./
+:doc-examples: ./_examples
+:imagesdir: {target-dir}/asciidoc/sources/images
+:includes: ./_includes
+:toc: preamble
+:sectnums:

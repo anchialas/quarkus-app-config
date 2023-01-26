@@ -12,7 +12,10 @@ make doc
 
 ### View the output
 
+![config-properties-output.png](src/main/img/config-properties-output.png)
+
 It produces a html and a pdf document. You find it here:
 
 * `target/generated-docs/quarkus-app-config.html`
 * `target/generated-docs-pdf/quarkus-app-config.pdf`
+
